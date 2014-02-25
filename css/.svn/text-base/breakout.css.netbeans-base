@@ -1,0 +1,25 @@
+/* 
+    Document   : breakout
+    Created on : 04/06/2013, 11:33:08 AM
+    Author     : Joseph
+    Description: Breakout stylesheet
+*/
+html,body{width:100%; height:100%;}
+body{margin:0; padding:0;}
+
+canvas{padding:0; margin:0; font-size: 0;}
+#gameframe{ 
+            display: block;
+            border:1px solid #000000;
+            margin:20px auto;
+            padding:0;
+}
+
+#instructions{
+	display: block;
+	width: 800px;
+	text-align: center;
+	font-weight: bold;
+	margin: 10px auto;
+}
+
