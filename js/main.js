@@ -1,13 +1,25 @@
+"use strict";
+
+/** Global Declarations
+ *
+ * @type {string}
+ */
+
 var userAgent =  window.navigator.userAgent;
 var body = document.getElementsByTagName("body")[0];
-var IEver = getInternetExplorerVersion();
 var life = 3;
 
+
+var isCanvasSupported = function (){
+    var canvas = document.getElementById("gameframe");
+    return !!(canvas.getContext && canvas.getContext("2d"));
+};
+
 /** function to get IE versions this is good to replace  the $.(browser) Jquery function that is absent on jquery 1.9 **/
-function getInternetExplorerVersion()
-// Returns the version of Windows Internet Explorer or a -1
-// (indicating the use of another browser).
-{
+var getInternetExplorerVersion = function (){
+    // Returns the version of Windows Internet Explorer or a -1
+    // (indicating the use of another browser).
+
    var rv = -1; // Return value assumes failure.
    if (navigator.appName == 'Microsoft Internet Explorer')
    {
@@ -17,30 +29,28 @@ function getInternetExplorerVersion()
          rv = parseFloat( RegExp.$1 );
    }
    return rv;
-}
+};
 
-/* browser detection condition if IE or other browsers */
-if (/MSIE (\d+\.\d+);/.test(userAgent)){
-   if (IEver < 9){
-       ErrorCanvasSupport();
-        } 
-      if (IEver >= 9){
-             document.addEventListener("DOMContentLoaded", main, false);
-      }
-         }else{
-             if(isCanvasSupported()){                
-                  document.addEventListener("DOMContentLoaded", main, false);
-             }else{
-                  ErrorCanvasSupport();
-             }
-}
 
-function isCanvasSupported(){
-     var canvas = document.getElementById("gameframe");
-     return !!(canvas.getContext && canvas.getContext("2d"));
-}
 
-function main(){   
+
+var randomize = function (min,max) {
+
+    return (Math.round((max-min) * Math.random() + min));
+};
+
+var randomGenerator = function (num_elements,min,max) {
+
+    var nums = new Array;
+
+    for (var element=0; element<num_elements; element++) {
+        nums[element] = randomize(min,max);
+    };
+
+    return (nums);
+};
+
+var main = function (){
     var canvas = document.getElementById("gameframe");
     var context = canvas.getContext("2d");
     var gameLoop;
@@ -59,7 +69,7 @@ function main(){
       "red" : "#cc3333",
       "green" :"#66cc66",
       "blue" : "#003366"
-    }    
+    };
 
     var ball = {
       "ballX" : "",
@@ -68,7 +78,7 @@ function main(){
       "ballRadius" : 10,
       "ball.DeltaX" :"",
       "ball.DeltaY" :""
-    }
+    };
 
     var paddle = {
       "paddleX" : "",
@@ -79,67 +89,40 @@ function main(){
       "paddleSpeedX" :10,
       "paddleMove" :""
 
-    }
+    };
 
 
 
-function random_number(min,max) {
 
-    return (Math.round((max-min) * Math.random() + min));
-}
-
-function generate_random_numbers(num_elements,min,max) {
-
-    var nums = new Array;
-
-    for (var element=0; element<num_elements; element++) {
-        nums[element] = random_number(min,max);
-    }
-
-    return (nums);
-}
-
-    var myNumArray = generate_random_numbers(10,1,4), myNumArray2 = generate_random_numbers(10,1,4),
-        myNumArray3 = generate_random_numbers(10,1,4), myNumArray4 = generate_random_numbers(10,1,4);
+    var myNumArray = randomGenerator(10,1,4), myNumArray2 = randomGenerator(10,1,4),
+        myNumArray3 = randomGenerator(10,1,4), myNumArray4 = randomGenerator(10,1,4);
 
 
     var bricksElements = {
       "bricks" : [myNumArray,myNumArray2,myNumArray3,myNumArray4],
       "brickWidth" : canvas.width/10,
       "brickHeight" : 20,
-      
-    }
+
+    };
 
     var sounds ={
       "bouncing" : new Audio("sounds/collision.ogg"),
       "breaking" :new Audio("sounds/explosion.ogg")
-    }
+    };
 
-    if (/MSIE (\d+\.\d+);/.test(userAgent)){                      
-          if (IEver < 9){
-           alert(IEver);
-           document.attachEvent("onkeydown",getKeystrokeIE,true);
-            }else{                 // repeated add Event Listener for IE version more than 9   
-                startGame(); 
-                window.addEventListener("keydown",getKeystroke, true); 
-              }
-            }else{  
-                window.addEventListener("keydown",getKeystroke, true);    
-                startGame();      
-       }
+
     
     
-  function drawPaddle(){
+ var drawPaddle = function (){
       var paddleImg = new Image();
       paddleImg.src = "images/paddle.png";
       //context.lineWidth = 30;
       //context.fillStyle = colorPurple;
       //context.fillRect(paddle.paddleX,paddle.paddleY,paddle.paddleWidth,paddle.paddleHeight);
       context.drawImage(paddleImg,paddle.paddleX,paddle.paddleY);
+  };
 
-  }
-
-  function drawBall(){
+  var drawBall = function (){
         var ballImg = new Image();
         ballImg.src = "images/ball.png";
      // draw ball with orange fill
@@ -152,10 +135,10 @@ function generate_random_numbers(num_elements,min,max) {
       //context.stroke();
       context.drawImage(ballImg, ball.ballX - Math.PI*3.12, ball.ballY - Math.PI*3.12);
       //console.log(Math.PI*3.12);
-  }
+  };
 
 // draw a single brick
-  function drawBrick(brickX,brickY,brickType){   
+ var drawBrick = function (brickX,brickY,brickType){
       switch(brickType){ // draw four colors for bricks
           case 1:
               context.fillStyle = colors.cyan;            
@@ -178,29 +161,29 @@ function generate_random_numbers(num_elements,min,max) {
           context.lineWidth = 1;
           context.fillRect(brickX * bricksElements.brickWidth, brickY * bricksElements.brickHeight, bricksElements.brickWidth, bricksElements.brickHeight);
       } 
-  }
+  };
  
 // iterate through the bricks array and draw each brick using drawBrick()
-  function createBricks(){
+  var createBricks = function (){
       for (var i=0; i < bricksElements.bricks.length; i++) {
           for (var j=0; j < bricksElements.bricks[i].length; j++) {
               drawBrick(j,i,bricksElements.bricks[i][j]);
           }
       }
-  }
+  };
  
 // function for showing a score board.
-  function showScoreBoard(){
+  var showScoreBoard = function (){
       //Set the text font and color
       context.fillStyle = colors.green;
-      context.font = "20px Arial";     
+      context.font = "20px Calibri";
       //Clear the bottom 30 pixels of the canvas
       //context.clearRect(0,canvas.height-30,canvas.width,30);  
       // Write Text 5 pixels from the bottom of the canvas
       context.fillText("Score:"+score,710, canvas.height - 15);
-  }
+  };
 
-  function showLife(){
+  var showLife = function (){
     //Set the text font and color
       context.fillStyle = colors.red;
      // context.font = "20px Arial";     
@@ -209,10 +192,10 @@ function generate_random_numbers(num_elements,min,max) {
       // Write Text 5 pxels from the bottom of the canvas
       context.fillText("Lives:"+ life, 20 , canvas.height - 15);
 
-  }
+  };
 
 
-  function moveBall(){
+  var moveBall = function (){
       if (ball.ballY + ball.DeltaY - ball.ballRadius < 0 || collisionYWithBricks()){
       ball.DeltaY = -ball.DeltaY;
          sounds.bouncing.play();
@@ -251,9 +234,9 @@ function generate_random_numbers(num_elements,min,max) {
            // Move the ball
           ball.ballX = ball.ballX + ball.DeltaX;
           ball.ballY = ball.ballY + ball.DeltaY;
-  }
+  };
    
-  function movePaddle(){
+ var movePaddle = function (){
           if (paddle.paddleMove == 'LEFT'){
               paddle.paddleDeltaX = -paddle.paddleSpeedX;
               } else if (paddle.paddleMove == 'RIGHT'){
@@ -266,16 +249,15 @@ function generate_random_numbers(num_elements,min,max) {
               paddle.paddleDeltaX = 0; 
               }
               paddle.paddleX = paddle.paddleX + paddle.paddleDeltaX;
-  }
+  };
     
-  function collisionXWithPaddle(){
+  var collisionXWithPaddle = function (){
     var bumpedX = false;
-
     if (ball.ballX + ball.DeltaX + ball.ballRadius >= paddle.paddleCenterX && paddle.paddleWidth) {
     }
-  }
+  };
 
-  function collisionXWithBricks(){
+  var collisionXWithBricks = function (){
       var bumpedX = false;    
       for (var i=0; i < bricksElements.bricks.length; i++) {
           for (var j=0; j < bricksElements.bricks[i].length; j++) {
@@ -302,9 +284,9 @@ function generate_random_numbers(num_elements,min,max) {
           }
       }
      return bumpedX;
-  }
+  };
 
-  function collisionYWithBricks(){
+  var collisionYWithBricks = function (){
       var bumpedY = false;
       for (var i=0; i < bricksElements.bricks.length; i++) {
           for (var j=0; j < bricksElements.bricks[i].length; j++) {
@@ -330,9 +312,9 @@ function generate_random_numbers(num_elements,min,max) {
           }
       }
       return bumpedY;
-  }
+  };
  
-  function explodeBrick(i,j){
+  var explodeBrick = function (i,j){
     // First weaken the brick (0 means brick has gone)
  
     if (bricksElements.bricks[i][j] === 1 ){ 
@@ -365,11 +347,10 @@ function generate_random_numbers(num_elements,min,max) {
        sounds.breaking.play();
     }
     
-  }
+  };
 
-  function framerate() {
-    
-          context.clearRect(0,0,canvas.width,canvas.height);     
+  var framerate = function () {
+          context.clearRect(0,0,canvas.width,canvas.height);
           createBricks();
           showLife();
           showScoreBoard();         
@@ -377,10 +358,10 @@ function generate_random_numbers(num_elements,min,max) {
           moveBall(); 
           movePaddle();
           drawPaddle();
-          
-  }
+  };
 
-  function startGame(){
+  var startGame = function (){
+
       clearInterval(gameLoop); // prevents framerate from accumilating when function is executed again from playagain button
 
 
@@ -395,67 +376,68 @@ function generate_random_numbers(num_elements,min,max) {
       paddle.paddleDeltaX = 0;      
       gameLoop = setInterval(framerate,10);
 
-      }
+      };
 
-      function endGame(){
+     var endGame = function (){
               clearInterval(gameLoop);         
               context.fillStyle = colors.blue;
               context.fillText('Game Over!', canvas.width/2 - 50, canvas.height/2);
+              replayGame();
+      };
 
-              replayButton();             
-      }
+    var redrawBricks = function(){
+
+        myNumArray = randomGenerator(10,1,4), myNumArray2 = randomGenerator(10,1,4),
+            myNumArray3 = randomGenerator(10,1,4), myNumArray4 = randomGenerator(10,1,4);
+
+        bricksElements.bricks = [myNumArray,myNumArray2,myNumArray3,myNumArray4];
+    };
+
+    var drawButton =  function(buttontext){
+
+        var buttonX = canvas.width/2 - 42,
+            buttonY = canvas.height/2 + 130,
+            elemLeft = canvas.offsetLeft,
+            elemTop = canvas.offsetTop,
+            elements = [];
+        elements.push({ width:100, height:30, top:buttonY, left:buttonX });
+        canvas.addEventListener('click', function(e){
+            var x = e.pageX - elemLeft,
+                y = e.pageY - elemTop;
+
+
+            // Collision detection between clicked offset and element.
+            elements.forEach(function(element) {
+                if (y > element.top && y < element.top + element.height && x > element.left && x < element.left + element.width) {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    life = 3;
+                    score = 0;
+                    startGame();
+
+                }
+            });
+        }, false);
+
+        //* draw play again button *//
+        elements.forEach(function(element) {
+            context.fillRect(element.left, element.top, element.width, element.height);
+            context.fillStyle = colors.white;
+            context.font = "16px Arial";
+            context.fillText(buttontext,element.left + 10,element.top + 20);
+        });
+    };
       
-      function replayButton(){
-       //** redraw bricks when replay button is pressed *//
+    var replayGame = function (){
+      var  buttontext = "Play Again?";
+      redrawBricks();
+        drawPaddle();
+        drawButton(buttontext);
 
-       myNumArray = generate_random_numbers(10,1,4), myNumArray2 = generate_random_numbers(10,1,4),
-       myNumArray3 = generate_random_numbers(10,1,4), myNumArray4 = generate_random_numbers(10,1,4);
 
-      bricksElements.bricks = [myNumArray,myNumArray2,myNumArray3,myNumArray4];
-
-      //* draw play again button *//
-
-       var buttonX = canvas.width/2 - 42,
-       buttonY = canvas.height/2 + 130;
-         elemLeft = canvas.offsetLeft,
-         elemTop = canvas.offsetTop;
-         elements = [];
-         elements.push({
-             width:100,
-             height:30,
-             top:buttonY,
-             left:buttonX 
-         });
-        
-     
-         
-         canvas.addEventListener('click', function(e){
-         var x = e.pageX - elemLeft,
-         y = e.pageY - elemTop;
-   
-        
-      // Collision detection between clicked offset and element.
-           elements.forEach(function(element) {
-          if (y > element.top && y < element.top + element.height && x > element.left && x < element.left + element.width) {
-             context.clearRect(0, 0, canvas.width, canvas.height);
-              life = 3;
-              score = 0; 
-              startGame();
-    
-              }
-          });
-          }, false);
-       
-              elements.forEach(function(element) { 
-                  context.fillRect(element.left, element.top, element.width, element.height);
-                  context.fillStyle = colors.white;
-                  context.font = "16px Arial";  
-                  context.fillText("Play Again?",element.left + 10,element.top + 20);
-              });
-  }
+  };
           
         
-  function getKeystroke(e){
+ var getKeystroke = function (e){
           document.onkeydown = function(e){ 
           var theKey = e.keyCode;
           switch (theKey){
@@ -466,7 +448,7 @@ function generate_random_numbers(num_elements,min,max) {
               default : movePaddle(paddle.paddleMove = "NONE") ; 
               }  
 
-          }      
+          };
   document.onkeyup = function(e){ 
           var theKey = e.keyCode;
           switch (theKey){
@@ -478,17 +460,45 @@ function generate_random_numbers(num_elements,min,max) {
               }  
 
           }
-  }
+  };
 
-}
+    if (/MSIE (\d+\.\d+);/.test(userAgent)){
+        if (getInternetExplorerVersion < 9){
+            alert(getInternetExplorerVersion);
+            document.attachEvent("onkeydown",getKeystrokeIE,true);
+        }else{
+            // repeated add Event Listener for IE version more than 9
+            startGame();
+            window.addEventListener("keydown",getKeystroke, true);
+        }
+    }else{
+        window.addEventListener("keydown",getKeystroke, true);
+        startGame();
+    }
 
-function ErrorCanvasSupport(){
+};
+
+var ErrorCanvasSupport = function (){
     
     alert ("Your browser doesn't support canvas!")
     
+};
+
+
+/* browser detection condition if IE or other browsers */
+if (/MSIE (\d+\.\d+);/.test(userAgent)){
+    if (getInternetExplorerVersion < 9){
+        ErrorCanvasSupport();
+    }
+    if (getInternetExplorerVersion >= 9){
+        document.addEventListener("DOMContentLoaded", main, false);
+    }
+}else{
+    if(isCanvasSupported()){
+        document.addEventListener("DOMContentLoaded", main, false);
+    }else{
+        ErrorCanvasSupport();
+    }
 }
-
-
-  
 
 
